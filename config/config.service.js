@@ -12,3 +12,4 @@ export const Port = process.env.PORT
 export const mongoo_db= process.env.MONGOO_DB
 export const salt_rounds= Number(process.env.SALT_ROUNDS)
 export const secret_key = process.env.SECRET_KEY
+export const refresh_secret_key= process.env.REFRESH_SECRET_KEY

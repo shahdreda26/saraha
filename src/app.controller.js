@@ -10,7 +10,7 @@ export const bootstrap = async () => {
     app.use(cors())//بستخدمها عشان اسمح للفرونت ياكسس كود الباك 
     app.use("/uploads",express.static("uploads"))// "config - image - html -..." زى <--"path as relative path" url عشان اقدر اتعامل معاها كانها apis بستخدمها مع الحاجات الثابته الى موجوده على الجهاز عندى يعنى الى ملهاش  
     //واتعامل معاه uploads ادخل جوه فولد ال /uploadsهنا بقوله اى حاجه على 
-    app.use(express.json());
+    app.use(express.json());//multer انا مش بستخدم فيها الapis الاول طب انا هخليه ليه لان عندى body بيهندل الداتا الى جايه من الmulter لان multer ممكن الغيه فى وجود ال 
     app.use("/users", userRouter);
    
     app.get("/", (req, res) => {

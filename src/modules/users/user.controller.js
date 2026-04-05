@@ -7,21 +7,23 @@ import {schemaValidation} from "../../common/middleware/validation.js"
 import * as uv from "./user.validation.js"
 import {multer_local,multer_host} from "../../common/middleware/multer.js"
 import { multer_mimetype } from '../../common/enum/multer.enum.js';
+
 export const userRouter = express.Router();
 
 userRouter.post("/signup",
     //multer_local({custom_type:[...multer_mimetype.image,...multer_mimetype.pdf]})
-    multer_host(multer_mimetype.image).single("attachment")
+    multer_local({custom_type:multer_mimetype.image}).single("attachment"),
+    schemaValidation(uv.signupSchema)// multer لازم يكون بعد ال bodyالاول فعشان اطبق اى حاجه على ال  form data  للداتا الى جايه من نوع  handeling  بيعمل multer عشان خاطر ال multer  بحطه بعد ال 
     ,us.signUp); //fields -->array of object  بتاخد منى  --> return object فيه مجموعه من ال keys وكل واحد منهم يكون array of object 
 //.single("attachment")--> attachment "field name"--> postmanدا الى هحطه فى ال - attachment لو كتبته غلط هيدينى Unexpected field
 //.fields([{name:"attachment1",maxCount:2},{name:"attachment2",maxCount:1}])
 //.array("attachments",2)-->2 -->maxcount --> return array 
 
 userRouter.post("/signup/gmail", us.signUpWithGmail);
-
-userRouter.post("/signin", us.signIn); 
+userRouter.post("/signin",schemaValidation(uv.loginSchema), us.signIn); 
 userRouter.get("/profile",authentication,authorization([RoleEnum.user]), us.getProfile);
-
+userRouter.get("/refresh-token",us.refreshToken) // send refresh token return new access token 
+userRouter.get("/share-profile/:id",schemaValidation(uv.shareProfileSchema),us.shareProfile)
 
 // regular expression : هى طريقه بكتب بيها نمط معين عشان اتاكد ان البيانات الى داخله مطابقه للنمط دا 
 //https://regex101.com

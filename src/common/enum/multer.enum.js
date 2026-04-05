@@ -1,6 +1,6 @@
 
 export const multer_mimetype={
-    image:["image/png","image/jpg"],
-    vedio:["vedio/mp4","vedio/3gp","vedio/mov"],
+    image:["image/png","image/jpeg"],
+    video:["video/mp4","video/3gp","video/mov"],
     pdf:["application/pdf"]
 }

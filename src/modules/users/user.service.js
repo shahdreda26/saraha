@@ -6,7 +6,7 @@ import {generate_token,verify_token} from "../../common/utils/token.service.js"
 import * as db_service from "../../db/db.service.js"
 import { userModel } from "../../db/models/user.model.js"
 import { OAuth2Client } from "google-auth-library"
-import {salt_rounds,secret_key} from "../../../config/config.service.js"
+import {refresh_secret_key, salt_rounds,secret_key} from "../../../config/config.service.js"
 import cloudinary from "../../common/utils/cloudinary.js"
 
 
@@ -14,6 +14,13 @@ export const signUp = async (req,res,next)=>{
     const {userName,email,password,cpassword,gender,phone}=req.body
     //console.log(req.file,"--------after upload -------")//single
     // console.log(req.files,"--------after upload -------") // fields - array 
+
+    //----> وانا شغال local multer
+    // if(!req.file){//validation file in file user.validation.js بدل دا هروح اعمل 
+    //     throw new Error(" file is required");
+        
+    // }
+
     const {secure_url,public_id} =await cloudinary.uploader.upload(req.file.path,{// await --> error promise
         folder:"saraha_app/users",// if folder exist add photo if not exist create it
         //public_id:"shahd" //overwrite دا مش كويس لانه بيرجعنى ل
@@ -35,6 +42,9 @@ export const signUp = async (req,res,next)=>{
     //     arr_paths.push(file.path)
     // }
 
+    // await cloudinary.uploader.destroy()// remove file from cloudinary
+    // await cloudinary.api.delete_folder()//remove folder from cloudinary
+    // await cloudinary.api.delete_resources_by_prefix()// بتفضى الفولدر 
 
     if(password!==cpassword){
         throw new Error("invalid password",{cause:400});
@@ -84,8 +94,7 @@ export const signUpWithGmail= async (req,res,next)=>{
                 confirmed:email_verified,
                 userName:name,
                 profilePicture:picture,
-                provider: enums.providerEnum.google}
-                
+                provider: enums.providerEnum.google}         
         })
     }
 
@@ -119,7 +128,7 @@ export const signIn =async (req,res,next)=>{
     if (! compareHash({plainText:password,hashText:user.password})){
         throw new Error("invalid password",{cause:400});
     }
-    const access_token = generate_token({
+    const access_token = generate_token({ // create access token
         payload:{
             id:user._id,email:user.email
         },
@@ -132,11 +141,69 @@ export const signIn =async (req,res,next)=>{
         // 
         }
     })
-     successResponse({res,statusCode:201 ,message:"success signIn",data:{user, access_token}})
+
+    const refresh_token = generate_token({ // create refresh token 
+        payload:{
+            id:user._id,email:user.email
+        },
+        secret_key:refresh_secret_key,
+        options:{
+            expiresIn:"1y"
+        
+        }
+    })
+     successResponse({res,statusCode:201 ,message:"success signIn",data:{user,access_token,refresh_token}})
 }
 
-export const getProfile = async(req,res,next)=>{
+export const getProfile = async(req,res,next)=>{// انت متسجل عندى اصلا وبتبعتلى توكين عشان اقدر اجيب البروفايل بتاعك من خلال التوكين الى انت بعتهولى 
    
       successResponse({res,statusCode:201 ,message:"success signIn profile",data:req.user})
+}
+
+// يعنى نهال عايزه بروفايل حبيبه فانا هاخده كوبى ابعته لنهال فنهال تقدر تدخل عليه 
+//share profile دا لينك ببدا generate it  بحط فيه id user عشان اما حد يدوس عليه يدخل على profile user 
+export const shareProfile = async(req,res,next)=>{// انت متسجل عندى اصلا وبتبعتلى توكين عشان اقدر اجيب البروفايل بتاعك من خلال التوكين الى انت بعتهولى 
+    const {id} = req.params 
+    const user=await db_service.find_by_id({model:userModel,filter:{_id:id},select:"-password"})
+    if(!user){
+        throw new Error("user not exist",{cause:400});
+    }           
+       user.phone = decrypt(user.phone) // عشان يفك تهيش الرقم ويظهرلى الرقم عادى0120 00 00 000 
+
+      successResponse({res,data:user})
+}
+// api الى هيبعتلى عليها ال refresh token عشان يقدر generate access token جديد
+export const refreshToken = async(req,res,next)=>{
+   const {authorization}= req.headers // token جايلى من الهيدر 
+           if(!authorization){
+               throw new Error("token not exist");    
+           }  
+   
+       const token = authorization.split(" ")[1]//[bearer,token]
+       const decoded = verify_token({// بفكه بال signature الى انا كنت create بيه ال refresh token 
+                   token:token,
+                   secret_key: refresh_secret_key,
+                   options: {
+                       ignoreExpiration:true // التوكين expire تجاهل  --> options عباره عن 
+           }})
+               if(!decoded|| !decoded?.id){//token مفيهوش id
+                   throw new Error("invalid token");
+                   }
+                const user = await db_service.find_one({model:userModel, filter:{_id:decoded.id},select:"-password"});//select:"-password" لانه متهيش فملوش لازمه يظهر password هاتلى كل الداتا ماعدا ال 
+                       if(!user){
+                           throw new Error("user not found",{cause:404});
+                       }  
+
+                const access_token = generate_token({ // create access token
+                    payload:{
+                        id:user._id,email:user.email
+                    },
+                    secret_key:secret_key,
+                    options:{
+                        expiresIn:60*2 
+                    }
+                })
+                   
+      successResponse({res,data:access_token})
 
 }
