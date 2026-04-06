@@ -25,7 +25,7 @@ userRouter.get("/refresh-token",us.refreshToken) // send refresh token return ne
 userRouter.get("/share-profile/:id",schemaValidation(uv.shareProfileSchema),us.shareProfile)
 userRouter.patch("/update-profile",authentication,schemaValidation(uv.updateProfileSchema), us.updateProfile);
 userRouter.patch("/update-password",authentication,schemaValidation(uv.updatePasswordSchema), us.updatePassword);
-userRouter.post("/logout", authentication, us.logout);
+userRouter.post("/log-out", authentication, us.logout);
 
 // regular expression : هى طريقه بكتب بيها نمط معين عشان اتاكد ان البيانات الى داخله مطابقه للنمط دا 
 //https://regex101.com
@@ -65,3 +65,5 @@ userRouter.post("/logout", authentication, us.logout);
 //web[a-z]-->واخلى البرنامج insensitive [a-z] or [A-Z]
 // multiline --> check على كل سطر 
 //let x = "shahd reda farag".replace(/\s/g,"-")  حول اى مسافه--> shahd-reda-farag
+
+

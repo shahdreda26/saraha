@@ -4,7 +4,7 @@ import { userModel } from "../../db/models/user.model.js"
 import {secret_key} from "../../../config/config.service.js"
 import {successResponse} from "../utils/response/success.response.js"
 import { decrypt } from "../utils/security/encrypt.security.js"
-import { revokeTokenModel } from "../../db/models/revoke.model.js"
+import { revokeTokenModel } from "../../db/models/revokeToken.model.js"
 //middleware = (req,res,next)=>{}
 
 export const authentication =async (req,res,next)=>{
@@ -34,19 +34,21 @@ export const authentication =async (req,res,next)=>{
                     }  
                 successResponse({res,statusCode:201 ,message:"success login",data:{...user._doc,phone:decrypt(user.phone)}})
             
-                // token expire  ومش هتشتغل على ولا جهاز خلاص --> check logout from all devices
-                
+                // token expire --> ومش هتشتغل على ولا جهاز خلاص --> check logout from all devices
+                // time logout > time generate token then token is expired 
                 if (user?.changeCredential?.getTime()> decoded.iat*1000){ //time create token --> decoded.iat "second"  & changeCredential--> date  & getTime()--> time in millisecond & *1000 convert into millisecond
                 throw new Error("token expired")//? عشان لو مفيش ميدنيش ايرور cannot read undefined getTime
              }
                 // check logout from specific device
-                const revokeToken = await db_service.find_one({model:revokeTokenModel,
-                    filter:{tokenId:decoded.jti}}) // decoded.jti --> token id
+                const revokeToken = await db_service.find_one(
+                    {model:revokeTokenModel,
+                    filter:{tokenId:decoded.jti}
+                }) // decoded.jti --> token id
                     if(revokeToken){      
                         throw new Error("token expired")
                     }
 
             req.user = user//user وحط جواه قيمه user اسمه key ال req زود فى 
-            req.decoded=decoded // revoke token اجيب منه ال exp - jti
+            req.decoded=decoded //  اجيب منه ال exp - jti & return payload 
             next()// الى بعده middlewarw عشان يقدر يدخل على ال 
 }

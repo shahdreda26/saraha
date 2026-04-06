@@ -139,7 +139,7 @@ export const signIn =async (req,res,next)=>{
         //     notBefore: 60 ,// sec
         //     audience: "http://localhost:4000",
         //     issuer: "http://localhost:3000"
-         //      jwtid: jwt_id
+              jwtid: jwt_id
         }
     })
 
@@ -150,7 +150,7 @@ export const signIn =async (req,res,next)=>{
         secret_key:refresh_secret_key,
         options:{
             expiresIn:"1y",
-         //   jwtid: jwt_id //عشان اما يضرب الاتنين يبوظوا 
+            jwtid: jwt_id //سوا expire عشان اما يطلع الاتنين يبوظوا 
         
         }
     })
@@ -197,6 +197,14 @@ export const refreshToken = async(req,res,next)=>{
                            throw new Error("user not found",{cause:404});
                        }  
 
+                const revokeToken = await db_service.find_one(
+                    {model:revokeTokenModel,
+                    filter:{tokenId:decoded.jti}
+                }) // decoded.jti --> token id
+                    if(revokeToken){      
+                        throw new Error("token expired")
+                    }
+
                 const access_token = generate_token({ // create access token
                     payload:{
                         id:user._id,email:user.email
@@ -242,19 +250,24 @@ export const updatePassword = async(req,res,next)=>{//  Eng.ali
 export const logout = async(req,res,next)=>{ //هل انت عايزه يخرج من كل الاجهزه ولا من جهاز معين ؟ 
 
     const {flag} = req.query
+
     if(flag === "all"){// logout from all devices 
 
-        req.user.changeCredential = Date.now() //  وقت ال logout  update  اعمل
+        req.user.changeCredential = Date.now() //logout  وقت ال  update  اعمل
         await req.user.save() 
+        // بمسح من الداتا بيز
         await db_service.delete_many({model:revokeTokenModel,filter:{userId:req.user._id}}) //   احذف كل التوكينات الى موجوده عندى فى الداتابيز  تخص اليوزر دا عشان خلاص هو خرج من كل الاجهزه
     
     }else{//هخزن عندى معلومات revoketoken دا 
 
-        await db_service.create({model:revokeTokenModel,
-            data:{tokenId: req.decoded.jti, userId:req.user._id,
-                 expireAt:new Date(req.decoded.exp*1000)}}) // *1000 = millisecond
-    }
-    
+        await db_service.create({// بخزن فى الداتا بيز 
+            model:revokeTokenModel,
+            data:{
+                tokenId: req.decoded.jti,
+                 userId:req.user._id,
+                 expireAt:new Date(req.decoded.exp*1000)
+                }}) // *1000 = millisecond
+    }   
     
     successResponse({res,message:"logout successfully"})
 }
