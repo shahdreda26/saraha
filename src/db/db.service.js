@@ -53,3 +53,7 @@ export const find_and_update = async ({model,filter={},update={},options={}}={})
 
     return await doc.exec();//نفذلى الكلام دا كله بقى
  }  
+
+ export const delete_many  = async ({model,filter={}}={}) => {
+    return await model.deleteMany(filter);
+ }

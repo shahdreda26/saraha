@@ -18,12 +18,14 @@ userRouter.post("/signup",
 //.single("attachment")--> attachment "field name"--> postmanدا الى هحطه فى ال - attachment لو كتبته غلط هيدينى Unexpected field
 //.fields([{name:"attachment1",maxCount:2},{name:"attachment2",maxCount:1}])
 //.array("attachments",2)-->2 -->maxcount --> return array 
-
 userRouter.post("/signup/gmail", us.signUpWithGmail);
 userRouter.post("/signin",schemaValidation(uv.loginSchema), us.signIn); 
 userRouter.get("/profile",authentication,authorization([RoleEnum.user]), us.getProfile);
 userRouter.get("/refresh-token",us.refreshToken) // send refresh token return new access token 
 userRouter.get("/share-profile/:id",schemaValidation(uv.shareProfileSchema),us.shareProfile)
+userRouter.patch("/update-profile",authentication,schemaValidation(uv.updateProfileSchema), us.updateProfile);
+userRouter.patch("/update-password",authentication,schemaValidation(uv.updatePasswordSchema), us.updatePassword);
+userRouter.post("/logout", authentication, us.logout);
 
 // regular expression : هى طريقه بكتب بيها نمط معين عشان اتاكد ان البيانات الى داخله مطابقه للنمط دا 
 //https://regex101.com

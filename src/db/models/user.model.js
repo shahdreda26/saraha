@@ -15,7 +15,9 @@ export const userSchema = new mongoose.Schema({
         minlength:3,//اقل عدد حروف 3
         maxlength:20,// اكبر عدد حروف 10
         trim:true   
-},
+},// time logout > time generate token then token is expired 
+// any token generated before logout will be expired after logout 
+    changeCredential: Date, // بالضبط logout بالوقت الى عملت بيه update 
     email:{
         type:String,
         required:true,

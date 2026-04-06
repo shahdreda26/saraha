@@ -57,9 +57,9 @@ export const loginSchema={
         password:general_rule.password.required().length(8)
     }).required(),
 
-    query: joi.object({
-        x:joi.number().min(5).max(10).required()
-    }).required(),
+    // query: joi.object({
+    //     x:joi.number().min(5).max(10).required()
+    // }).required(),
 }
 
 export const shareProfileSchema={
@@ -67,3 +67,22 @@ export const shareProfileSchema={
         id:general_rule.id.required()
     }).required(),
 }
+
+export const updateProfileSchema={ // مش require عشان ممكن اطبق عليهم validation وممكن لا 
+    body: joi.object({
+            firstName : joi.string().min(5).trim(),
+            lastName : joi.string().min(5).trim(),
+            phone:joi.string(),   
+            gender:joi.string().valid(...Object.values(genderEnum))  ,
+            age:joi.number() 
+    }).required()  //لازم احط required لانى جاى اعمل update فلازم ابعتلك حاجه منهم
+    }
+
+export const updatePasswordSchema={ 
+    body: joi.object({
+            oldPassword : general_rule.password.required(),
+            newPassword : general_rule.password.required(),
+            cpassword : joi.string().required().valid(joi.ref("newPassword"))
+    }).required()
+    }
+      
