@@ -1,20 +1,5 @@
 import crypto from 'crypto';
 
-//encryption سريه المعلومات "confidentiality" is two way -->التشفير بيكون عكسى يعنى انا بشفر الباسورد وبقدر افك الشفرة واعرف الباسورد اللى فى الداتا (كلام مقروءplain text = 123456-->encrypt"algorithm"-->cipher text = asdfghjkl) & decryption (cipher text = asdfghjkl-->decrypt-->plain text = 123456) -->reserved
-    //-->symmetric encryption (same one key "shared secret key" for encryption & decryption) -->from source to destination
-        //--> algorithms: AES "advanced encryption standard", DES "data encryption standard "  & مميزاته faster than asymmetric encryption - simple to implement--> بستخدمه اما اكون انا الى مسوؤل عن تشفير الداتا وفكها
- // micro services use it  //-->asymmetric encryption (different keys "generate two keys" for encryption "public key" & decryption "private key") --> from source to  destination (public & private وكل واحد منهم ليه )  
-        //--> algorithms: RSA "Rivest-Shamir-Adleman" & ECC "Elliptic Curve Cryptography" & مميزاته more secure than symmetric encryption - no shared private key 
-//hashing سلامه المعلومات "integrity" is one way "irreversible" -->not allowed to dehash -->(plain text = 123456-->hashing-->hashed password = asdfghjkl) & data convert into  fixed_length & password ومقدرش ارجعها لاصلها تانى زى 
-  //-->algorithm :SHA-256 "secure hash algorithm 256" & MD5 "message digest 5" 
-  //-->Bcrypt generator.com --> app generate hashing value 
-  //--> algorithm :argon2 "2a" & Bcrypt "2b"
-  //-->cost factor --> number of rounds  (higher cost factor increases security but also increases the time it takes to hash a password and decrease performance)  2^cost factor = 10 --> 2^10 rounds of hashing
-  //--> salting --> add random data to ensure that the output is unique salt 
-  // encryption : crypto "server side" use in backend - high performance-security - more complex in implementation & crypto-js use in frontend --> are modules in Node.js 
-
-// create cipher --> update cipher --> final cipher "crypto module"
-
 const ENCRYPTION_KEY = Buffer.from("dfghjk45632@45321#ftyu123art98!4"); //--> 32 bytes 
 const IV_LENGTH = 16;//-->16 bytes
 

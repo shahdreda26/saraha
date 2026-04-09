@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-const NODE_ENV= process.env.NODE_ENV
+const NODE_ENV= process.env.NODE_ENV || "development"
 
 let env_paths={
     development: ".env.development",
@@ -13,3 +13,5 @@ export const mongoo_db= process.env.MONGOO_DB
 export const salt_rounds= Number(process.env.SALT_ROUNDS)
 export const secret_key = process.env.SECRET_KEY
 export const refresh_secret_key= process.env.REFRESH_SECRET_KEY
+export const email= process.env.EMAIL
+export const password= process.env.PASSWORD

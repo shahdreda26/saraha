@@ -49,7 +49,7 @@ password:{
         secure_url:{type:String,required:true},
         public_id:{type:String,required:true}
     }],//عشان بياحد منى اكتر من صوره فحطناهم فى ارااى
-    confirmed:Boolean,
+    confirmed:Boolean,  //الى انا بعتهولك هتاكد ان الايميل حقيقى otp  عشان نتاكد ان الايميل دا ايميل حقيقى بمجرد ما يضغطعلى على اللينك او تكتبلى ال otp احنا هنبدا نبعتلهsignup اما الشخص يعمل 
     provider:{
         type:String,
         enum:Object.values(userEnum.providerEnum),

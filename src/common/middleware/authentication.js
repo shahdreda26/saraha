@@ -2,9 +2,8 @@ import {verify_token} from "../utils/token.service.js"
 import * as db_service from "../../db/db.service.js"
 import { userModel } from "../../db/models/user.model.js"
 import {secret_key} from "../../../config/config.service.js"
-import {successResponse} from "../utils/response/success.response.js"
-import { decrypt } from "../utils/security/encrypt.security.js"
 import { revokeTokenModel } from "../../db/models/revokeToken.model.js"
+import { getValue, revoke_prefix} from "../../db/redis/redis.service.js"
 //middleware = (req,res,next)=>{}
 
 export const authentication =async (req,res,next)=>{
@@ -32,21 +31,24 @@ export const authentication =async (req,res,next)=>{
                     if(!user){
                         throw new Error("user not found",{cause:404});
                     }  
-                successResponse({res,statusCode:201 ,message:"success login",data:{...user._doc,phone:decrypt(user.phone)}})
-            
+                                
                 // token expire --> ومش هتشتغل على ولا جهاز خلاص --> check logout from all devices
                 // time logout > time generate token then token is expired 
                 if (user?.changeCredential?.getTime()> decoded.iat*1000){ //time create token --> decoded.iat "second"  & changeCredential--> date  & getTime()--> time in millisecond & *1000 convert into millisecond
                 throw new Error("token expired")//? عشان لو مفيش ميدنيش ايرور cannot read undefined getTime
              }
                 // check logout from specific device
-                const revokeToken = await db_service.find_one(
-                    {model:revokeTokenModel,
-                    filter:{tokenId:decoded.jti}
-                }) // decoded.jti --> token id
-                    if(revokeToken){      
-                        throw new Error("token expired")
-                    }
+                 const revokeToken = await getValue(revoke_prefix({ userId: user._id, tokenId: decoded.jti })) // revoke_token::485632586586=userId ::21485254865324=tokenId
+                 if(revokeToken){      
+                    throw new Error("token expired revoked")
+                }
+                //-----------***  db_service.find_one(--> هتعامل ب cache
+                //     {model:revokeTokenModel,
+                //     filter:{tokenId:decoded.jti}
+                // }) // decoded.jti --> token id
+                //     if(revokeToken){      
+                //         throw new Error("token expired")
+                //     }
 
             req.user = user//user وحط جواه قيمه user اسمه key ال req زود فى 
             req.decoded=decoded //  اجيب منه ال exp - jti & return payload 
