@@ -2,6 +2,7 @@ import express from "express";
 import { connectionDb } from "./db/connection_db.js";
 import { userRouter } from "./modules/users/user.controller.js";
 import {Port}  from "../config/config.service.js"
+import { redis_client, redis_connect } from "./db/redis/redis.connect.js";
 import cors from "cors"
 const app = express();
 const port = Port;
@@ -18,6 +19,24 @@ export const bootstrap = async () => {
     });
 
     await connectionDb();
+    await redis_connect();
+
+    // await redis_client.set("name","sarahaApp")// await عشان انا بكلم داتابيز;
+    // await redis_client.get("name").then((result)=>{console.log(result)}).catch((err)=>{console.log(err)})// return value = sarahaApp
+    // await redis_client.del("name")// delete 
+    // await redis_client.get("name") // return null
+
+    // await redis_client.set("name","sarahaApp",{EX: 10})// الاسم دا هيتمسح بعد 10 ثوانى
+    // const data =await redis_client.get("name") // return value = sarahaApp
+    // console.log(data);
+    // await redis_client.del("name")// delete name 
+    // console.log(data); // return sarahaApp because i save it in data variable before delete it from redis
+
+    // await redis_client.set("name","sarahaApp")
+    //await redis_client.expire("name",10)// الاسم دا هيتمسح بعد 10 ثوانى
+   
+
+
 
     app.use((err, req, res, next) => {//global error
         res.status(err.cause||500).json({ message: err.message,stack: err.stack });//err.cause-->status code  بتدينى رقم ال 
